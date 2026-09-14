@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: ksbrc-board-meeting-analyzer-v31
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/version
+    envVars:
+      - key: KSBRC_NO_BROWSER
+        value: "1"
+      - key: KSBRC_WHISPER_MODEL
+        value: tiny.en
