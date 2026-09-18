@@ -8,7 +8,7 @@ import time
 import webbrowser
 
 from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -21,12 +21,18 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/")
 def home():
-    return FileResponse(INDEX_FILE)
+    # Preserve the V31 HTML exactly as stored, and load the contextual classifier
+    # as a separate overlay after the existing V31 scripts have initialized.
+    html = INDEX_FILE.read_text(encoding="utf-8")
+    classifier_script = '<script src="/static/context-classifier.js?v=1"></script>'
+    if classifier_script not in html:
+        html = html.replace("</body>", classifier_script + "\n</body>")
+    return HTMLResponse(content=html)
 
 
 @app.get("/api/version")
 def version():
-    return {"version": "V31", "charts": "restored"}
+    return {"version": "V31", "charts": "restored", "classifier": "context-v1"}
 
 
 def _ffmpeg_ok():
